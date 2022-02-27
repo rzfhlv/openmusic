@@ -31,7 +31,36 @@ class SongService {
     return result.rows[0].id;
   }
 
-  async getSongs() {
+  async getSongs(params) {
+    let qStr = '';
+    const vPop = [];
+
+    const keys = Object.keys(params);
+    keys.forEach((key, index) => {
+      index++;
+      if (index === 1) {
+        qStr += ' WHERE';
+      } else {
+        qStr += ' AND';
+      }
+      qStr += ` ${key} ILIKE $${index}`;
+      vPop.push(`%${params[key]}%`);
+    });
+
+    if (keys.length) {
+      const query = {
+        text: `SELECT id, title, performer FROM songs${qStr}`,
+        values: vPop,
+      };
+
+      const result = await this._pool.query(query);
+
+      if (!result.rows.length) {
+        throw new NotFoundError('Song not found');
+      }
+
+      return result.rows;
+    }
     const result = await this._pool.query('SELECT id, title, performer FROM songs');
     return result.rows;
   }
