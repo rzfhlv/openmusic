@@ -42,7 +42,6 @@ const init = async () => {
 
   server.ext('onPreResponse', (request, h) => {
     const { response } = request;
-    console.log('error: ', response instanceof Error);
     if (response instanceof ClientError) {
       const newResponse = h.response({
         status: 'fail',
@@ -57,6 +56,7 @@ const init = async () => {
         status: 'error',
         message: 'Something went wrong',
       });
+      console.log(response.message);
       newResponse.code(500);
       return newResponse;
     }
